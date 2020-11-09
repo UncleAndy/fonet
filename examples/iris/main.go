@@ -6,9 +6,8 @@ import (
 	"math"
 	"os"
 
+	"github.com/UncleAndy/fonet"
 	"github.com/gocarina/gocsv"
-
-	"github.com/Fontinalis/fonet"
 )
 
 type IrisCase struct {
@@ -22,7 +21,7 @@ type IrisCase struct {
 }
 
 func main() {
-	n, err := fonet.NewNetwork([]int{4, 5, 5, 3})
+	n, err := fonet.NewNetwork([]int{4, 5, 5, 3}, fonet.Sigmond, nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

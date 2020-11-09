@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Fontinalis/fonet"
+	"github.com/UncleAndy/fonet"
 )
 
 var samples = [][][]float64{
@@ -47,7 +47,7 @@ var samples = [][][]float64{
 }
 
 func main() {
-	n, err := fonet.NewNetwork([]int{2, 3, 1})
+	n, err := fonet.NewNetwork([]int{2, 3, 1}, fonet.Sigmond, nil, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

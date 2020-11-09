@@ -19,6 +19,8 @@ var (
 	ErrNotEnoughLayers = errors.New("too few layers, minimum of 3 required")
 )
 
+type Estimator func(outputLayer []float64) float64
+
 // Network is containing all the needed settings/variables.
 type Network struct {
 	// w is the weights of the network.
@@ -39,6 +41,13 @@ type Network struct {
 	aFunc func(z float64) float64
 	// daFunc is the derivative of the activation function.
 	daFunc func(z float64) float64
+
+	// Оценочная функция для обучения нейросети через нее, а не через примеры
+	estimatorMin Estimator
+	estimatorMax Estimator
+
+	prevEstimatorMin float64
+	prevEstimatorMax float64
 }
 
 type jsonNetwork struct {
@@ -89,7 +98,7 @@ func (n *Network) UnmarshalJSON(data []byte) error {
 }
 
 // NewNetwork is for creating a new network with the defined layers.
-func NewNetwork(ls []int, activationFunc ActivationFunction) (*Network, error) {
+func NewNetwork(ls []int, activationFunc ActivationFunction, estimatorMin, estimatorMax Estimator) (*Network, error) {
 	if len(ls) < 3 {
 		return nil, ErrNotEnoughLayers
 	}
@@ -100,6 +109,10 @@ func NewNetwork(ls []int, activationFunc ActivationFunction) (*Network, error) {
 		activationID: activationFunc,
 		aFunc:        functionPairs[activationFunc][0],
 		daFunc:       functionPairs[activationFunc][1],
+		estimatorMin: estimatorMin,
+		estimatorMax: estimatorMax,
+		prevEstimatorMin: 1,
+		prevEstimatorMax: 0,
 	}
 
 	// init weights
@@ -159,14 +172,39 @@ func (n *Network) Train(trainingData [][][]float64, epochs int, lrate float64, d
 }
 
 func (n *Network) backpropagate(xy [][]float64, eta float64) {
+	// input sample layer
 	x := xy[0]
+	// output sample layer
 	y := xy[1]
 	// define z values
 	_ = n.feedforward(x)
 
 	// define the output deltas
-	for j := 0; j < len(n.d[len(n.d)-1]); j++ {
-		n.d[len(n.d)-1][j] = (n.a(len(n.d)-1, j) - y[j]) * n.daFunc(n.z[len(n.d)-1][j])
+	if n.estimatorMin != nil || n.estimatorMax != nil {
+		if n.estimatorMin != nil {
+			curEstimatorMin := n.estimatorMin(y)
+			estimatorMinDelta := n.prevEstimatorMin - curEstimatorMin
+			n.prevEstimatorMin = curEstimatorMin
+
+			// change output deltas by estimatorMinDelta
+			for j := 0; j < len(n.d[len(n.d)-1]); j++ {
+				n.d[len(n.d)-1][j] = estimatorMinDelta * n.daFunc(n.z[len(n.d)-1][j])
+			}
+		}
+		if n.estimatorMax != nil {
+			curEstimatorMax := n.estimatorMax(y)
+			estimatorMaxDelta := n.prevEstimatorMax - curEstimatorMax
+			n.prevEstimatorMax = curEstimatorMax
+
+			// change output deltas by estimatorMinDelta
+			for j := 0; j < len(n.d[len(n.d)-1]); j++ {
+				n.d[len(n.d)-1][j] = estimatorMaxDelta * n.daFunc(n.z[len(n.d)-1][j])
+			}
+		}
+	} else {
+		for j := 0; j < len(n.d[len(n.d)-1]); j++ {
+			n.d[len(n.d)-1][j] = (n.a(len(n.d)-1, j) - y[j]) * n.daFunc(n.z[len(n.d)-1][j])
+		}
 	}
 
 	// define the inner deltas
