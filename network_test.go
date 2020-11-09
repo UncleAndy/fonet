@@ -137,7 +137,7 @@ func TestNetwork(t *testing.T) {
 				t1.Fatal("Expected error, but received no error")
 			}
 
-			n, err = NewNetwork([]int{2, 3, 1}, tt.activationFunction, nil, nil)
+			n, err := NewNetwork([]int{2, 3, 1}, tt.activationFunction, nil, nil)
 			if err != nil {
 				t1.Fatalf("Could not create network: %+v", err)
 			}
