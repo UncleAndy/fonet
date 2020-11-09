@@ -39,9 +39,11 @@ func TestActivationFunction_String(t *testing.T) {
 			want: "Unknown",
 		},
 	}
-	for _, tt := range tests {
+	for _, tc := range tests {
+		tt := tc
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.a.String(); got != tt.want {
+			got := tt.a.String()
+			if got != tt.want {
 				t.Errorf("String() = %v, want %v", got, tt.want)
 			}
 		})

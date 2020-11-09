@@ -47,45 +47,6 @@ var samples = [][][]float64{
 	},
 }
 
-var samples2 = [][][]float64{
-	{
-		{
-			0,
-			0,
-		},
-		{
-			10,
-		},
-	},
-	{
-		{
-			0,
-			1,
-		},
-		{
-			20,
-		},
-	},
-	{
-		{
-			1,
-			0,
-		},
-		{
-			20,
-		},
-	},
-	{
-		{
-			1,
-			1,
-		},
-		{
-			10,
-		},
-	},
-}
-
 func TestNetwork(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 
@@ -163,19 +124,20 @@ func TestNetwork(t *testing.T) {
 		// },
 	}
 
-	for _, tt := range tests {
+	for _, tc := range tests {
+		tt := tc
 		t.Run(tt.name, func(t1 *testing.T) {
 			// NewNetwork should error with too few layers
-			n, err := NewNetwork([]int{1}, tt.activationFunction)
+			_, err := NewNetwork([]int{1}, tt.activationFunction, nil, nil)
 			if err != ErrNotEnoughLayers {
 				t1.Fatal("Expected error, but received no error")
 			}
-			n, err = NewNetwork([]int{3, 1}, tt.activationFunction)
+			_, err = NewNetwork([]int{3, 1}, tt.activationFunction, nil, nil)
 			if err != ErrNotEnoughLayers {
 				t1.Fatal("Expected error, but received no error")
 			}
 
-			n, err = NewNetwork([]int{2, 3, 1}, tt.activationFunction)
+			n, err = NewNetwork([]int{2, 3, 1}, tt.activationFunction, nil, nil)
 			if err != nil {
 				t1.Fatalf("Could not create network: %+v", err)
 			}

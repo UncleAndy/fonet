@@ -10,10 +10,6 @@ import (
 	"time"
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 var (
 	// ErrNotEnoughLayers is returned when trying to create a new network with too few layers.
 	ErrNotEnoughLayers = errors.New("too few layers, minimum of 3 required")
@@ -99,18 +95,20 @@ func (n *Network) UnmarshalJSON(data []byte) error {
 
 // NewNetwork is for creating a new network with the defined layers.
 func NewNetwork(ls []int, activationFunc ActivationFunction, estimatorMin, estimatorMax Estimator) (*Network, error) {
+	rand.Seed(time.Now().UnixNano())
+
 	if len(ls) < 3 {
 		return nil, ErrNotEnoughLayers
 	}
 
 	n := Network{
-		l:            len(ls) - 1,
-		ls:           ls[1:],
-		activationID: activationFunc,
-		aFunc:        functionPairs[activationFunc][0],
-		daFunc:       functionPairs[activationFunc][1],
-		estimatorMin: estimatorMin,
-		estimatorMax: estimatorMax,
+		l:                len(ls) - 1,
+		ls:               ls[1:],
+		activationID:     activationFunc,
+		aFunc:            functionPairs[activationFunc][0],
+		daFunc:           functionPairs[activationFunc][1],
+		estimatorMin:     estimatorMin,
+		estimatorMax:     estimatorMax,
 		prevEstimatorMin: 1,
 		prevEstimatorMax: 0,
 	}
