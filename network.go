@@ -191,7 +191,7 @@ func (n *Network) backpropagate(xy [][]float64, eta float64) {
 		}
 		if n.estimatorMax != nil {
 			curEstimatorMax := n.estimatorMax(y)
-			estimatorMaxDelta := n.prevEstimatorMax - curEstimatorMax
+			estimatorMaxDelta := curEstimatorMax - n.prevEstimatorMax
 			n.prevEstimatorMax = curEstimatorMax
 
 			// change output deltas by estimatorMinDelta
